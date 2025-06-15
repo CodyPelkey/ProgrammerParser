@@ -12,7 +12,7 @@ import requests
 import hashlib
 import sys
 
-APP_VERSION = "3.0.0"
+APP_VERSION = "3.0.1"
 
 ignore_vins = {
     "LB1WA5884A8008781",
@@ -21,7 +21,7 @@ ignore_vins = {
 }
 
 TAB_KEYS = [
-    "Summary", "KeyGen", "BatteryInfo", "DataLogging", "EEPROM", "Wifi", "Errors", "About"
+    "Summary", "UserData", "KeyGen", "BatteryInfo", "DataLogging", "EEPROM", "Wifi", "Errors", "About"
 ]
 
 def is_valid_vin(vin):
@@ -676,7 +676,7 @@ class ProgrammerParserApp:
 
                     data = {
                         "Programmer": programmer_type,
-                        **user_fields,
+                        "user_fields": user_fields, 
                         **sensors_data,
                         "keygen_data": keygen_data,
                         "batteryinfo_vins": batteryinfo_vins,
@@ -726,6 +726,22 @@ class ProgrammerParserApp:
             <li><b>Saved WiFi networks:</b> {len(data.get('wifi_networks',[]))}</li>
             {''.join([f"<li><b>ZIP {k}:</b> {v}</li>" for k, v in hashes.items()])}
             </ul>
+        </div>
+        </div>"""
+
+        user_fields = data.get("user_fields", {})
+
+        user_tab = f"""<div id="userdata" class="tab-content">
+        <h2>User Data</h2>
+        {"<div class='empty-msg'>No user data found.</div>" if not user_fields else ""}
+        <div class="info-card">
+        <ul class="info-list">
+            <li><b>User ID:</b> {user_fields.get('autelId', 'N/A')}</li>
+            <li><b>Nickname:</b> {user_fields.get('nickname', 'N/A')}</li>
+            <li><b>Phone Number:</b> {user_fields.get('phoneNumber', 'N/A')}</li>
+            <li><b>City:</b> {user_fields.get('city', 'N/A')}</li>
+            <li><b>State:</b> {user_fields.get('state', 'N/A')}</li>
+        </ul>
         </div>
         </div>"""
 
@@ -970,6 +986,7 @@ class ProgrammerParserApp:
     {tab_divs}
     </div>
     {include('Summary', summary_tab)}
+    {include('UserData', user_tab)}
     {include('KeyGen', keygen_tab)}
     {include('BatteryInfo', batteryinfo_tab)}
     {include('DataLogging', datalogging_tab)}
